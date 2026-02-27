@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Simulador IoT - Dimmer</title>
+
+                                    <!--Flask tem umas frescuras-->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+    <h1>Simulador do Dimmer com Potenciômetro</h1>
+
+    <p>Led</p>
+    <div id="led"></div>
+
+    <input type="range" min="0" max="1023" value="200" id="pot">
+    
+    <p>Lâmpada</p>
+    <div id="lampada">
+        <div id="bulbo"></div>
+        <div id="rosca"></div>
+    </div>
+    
+    <p id="rele">Relé: OFF</p>
+    
+    <h1 id="overload">!!!!!!!!!!!!!!!!!SOBRECARGA!!!!!!!!!!!!!!!!!</h1>
+
+    <!-- Java Script -->
+    <script>
+
+        const pot = document.getElementById("pot");
+        const led = document.getElementById("led");
+        const rele = document.getElementById("rele");
+        const bulbo = document.getElementById("bulbo");
+        const overload = document.getElementById("overload");
+
+        
+
+        pot.addEventListener("input", () => {
+          
+            fetch("/update", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ pot: pot.value })
+            })
+            .then(res => res.json())
+            .then(data => {
+
+                led.style.opacity = data.led / 100;
+
+                if (data.rele) {
+                    bulbo.style.opacity = data.led / 100;
+                    bulbo.style.boxShadow = "0 0 " + (data.led * 3) + "px rgba(255,200,0,1)";
+                } else {
+                    bulbo.style.opacity = 0.2;
+                    bulbo.style.boxShadow = "none";
+                }
+
+                    //FruFru
+                    if (data.led >= 100) {
+
+                    
+                    document.body.classList.add("flash");
+                    document.body.classList.add("shake");
+                    overload.style.display = "block";
+
+                    setTimeout(() => {
+                        document.body.classList.remove("flash");
+                        document.body.classList.remove("shake");
+                        overload.style.display = "none";
+                    }, 400);
+                    }
+
+                    if (data.led < 100) {
+                    
+                    }
+
+                    if (data.rele) {
+                        rele.innerText = "Relé: ON";
+                        rele.style.color = "green";
+                    } else {
+                        rele.innerText = "Relé: OFF";
+                        rele.style.color = "red";
+                    }
+                });
+        });
+
+    </script>
+
+</body>
+
+</html>
