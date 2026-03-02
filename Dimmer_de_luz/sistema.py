@@ -5,15 +5,15 @@ import webbrowser
 app = Flask(__name__)
 
 #Sistema
-pot_value = 0
-led_intensity = 0
-rele_state = False
+valor_potencio = 0 # Valor do potenciômetro (0-1023)
+intensidade_led = 0 # Intensidade da luz 
+estado_rele = False # Estado do relé (ativo ou inativo)
 
 #Limite para ativação
-RELE_THRESHOLD = 600 
+limitador_rele = 600 
 
 #Transição suave
-def smooth_transition(current, target):
+def transicao_suave(current, target):
     step = 1 if target > current else -1
 
     for value in range(current, target, step):
@@ -29,25 +29,25 @@ def home():
 
 @app.route("/update", methods=["POST"])
 def update():
-    global pot_value, led_intensity, rele_state
+    global valor_potencio, intensidade_led, estado_rele
 
     data = request.json
-    pot_value = int(data["pot"])
+    valor_potencio = int(data["pot"])
 
     #Converte 0-1023 (ADC do ESP32) para 0-100% (que pode ser lido pelo navegador)
-    target_intensity = int((pot_value / 1023) * 100)
+    target_intensity = int((valor_potencio / 1023) * 100)
 
-    led_intensity = smooth_transition(led_intensity, target_intensity)
+    intensidade_led = transicao_suave(intensidade_led, target_intensity)
 
-    rele_state = pot_value >= RELE_THRESHOLD
+    estado_rele = valor_potencio >= limitador_rele
 
     return jsonify({
-        "pot": pot_value,
-        "led": led_intensity,
-        "rele": rele_state
+        "pot": valor_potencio,
+        "led": intensidade_led,
+        "rele": estado_rele
     })
 
 
 if __name__ == "__main__":
     webbrowser.open("http://127.0.0.1:5000")
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False) # Use reloader=False para evitar abrir duas janelas no navegador.
