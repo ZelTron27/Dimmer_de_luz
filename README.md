@@ -1,5 +1,5 @@
 # Dimmer_de_luz
-Dimmer_de_luz_v2 é um simulador web de controle de luminosidade inspirado em sistemas IoT.
+Dimmer_de_luz é um simulador web de controle de luminosidade inspirado em sistemas IoT.
 
 O projeto simula o funcionamento de:
 - Um potenciômetro com leitura de 0 a 1023
